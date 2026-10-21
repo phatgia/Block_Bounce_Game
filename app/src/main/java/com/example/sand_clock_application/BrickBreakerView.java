@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class BrickBreakerView extends View {
@@ -127,5 +128,30 @@ public class BrickBreakerView extends View {
 
         // 5. Vẽ quả bóng (Ball)
         canvas.drawCircle(ballX, ballY, ballRadius, paintBall);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        float touchX = event.getX(); // Lấy tọa độ X của ngón tay
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN: // Khi vừa chạm ngón tay xuống
+            case MotionEvent.ACTION_MOVE: // Khi kéo ngón tay lướt đi
+                // Đưa thanh trượt đi theo ngón tay (canh ngón tay vào đúng giữa thanh)
+                paddleX = touchX - (paddleWidth / 2f);
+
+                // Chặn không cho thanh trượt bay ra khỏi mép trái màn hình
+                if (paddleX < 0) {
+                    paddleX = 0;
+                }
+                // Chặn không cho thanh trượt bay ra khỏi mép phải màn hình
+                if (paddleX + paddleWidth > getWidth()) {
+                    paddleX = getWidth() - paddleWidth;
+                }
+
+                invalidate(); // Bắt buộc phải gọi hàm này để Canvas vẽ lại vị trí mới!
+                return true;
+        }
+        return super.onTouchEvent(event);
     }
 }
