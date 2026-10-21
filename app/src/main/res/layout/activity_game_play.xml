@@ -10,37 +10,37 @@
 
 
     <Button
+        android:id="@+id/btnPause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="44dp"
+        android:layout_marginEnd="4dp"
+        android:backgroundTint="@color/material_dynamic_neutral10"
+        app:icon="@drawable/pause_24px"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
         android:id="@+id/btnBack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="72dp"
+        android:layout_marginTop="44dp"
         android:backgroundTint="@color/material_dynamic_neutral_variant10"
         app:icon="@drawable/arrow_back_ios_24px"
-        app:iconSize="24dp"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
+        app:iconSize="24dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btnPause"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="72dp"
-        android:layout_marginEnd="5dp"
-        android:backgroundTint="@color/material_dynamic_neutral10"
-        app:icon="@drawable/pause_24px"
-        app:iconSize="24dp"
-        app:iconGravity="textStart"
-        app:iconPadding="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.example.sand_clock_application.BrickBreakerView
         android:id="@+id/game_view"
-        android:layout_width="375dp"
-        android:layout_height="682dp"
+        android:layout_width="399dp"
+        android:layout_height="744dp"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="20dp"
         app:layout_constraintDimensionRatio="1:1.1"
@@ -48,4 +48,34 @@
         app:layout_constraintHorizontal_bias="0.555"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnPause" />
+
+    <TextView
+        android:id="@+id/txtLevel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="85dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginEnd="83dp"
+        android:text="Level 1"
+        android:textColor="@android:color/holo_green_light"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/btnPause"
+        app:layout_constraintStart_toEndOf="@+id/btnBack"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="79dp"
+        android:layout_marginTop="11dp"
+        android:layout_marginEnd="79dp"
+        android:text="Point: 0"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/btnPause"
+        app:layout_constraintStart_toEndOf="@+id/btnBack"
+        app:layout_constraintTop_toBottomOf="@+id/txtLevel" />
 </androidx.constraintlayout.widget.ConstraintLayout>

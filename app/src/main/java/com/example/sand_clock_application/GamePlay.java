@@ -19,11 +19,14 @@ import androidx.core.view.WindowInsetsCompat;
 public class GamePlay extends AppCompatActivity {
 
     Button btnBack, btnPause;
+    BrickBreakerView playGameView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_play);
+        playGameView = findViewById(R.id.game_view);
+        playGameView.isInteractive = true;
 
         btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(new View.OnClickListener() {
@@ -69,5 +72,14 @@ public class GamePlay extends AppCompatActivity {
             }
         });
         dialog.show();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+
+        if(!isFinishing()){
+            showPauseMessage();
+        }
     }
 }

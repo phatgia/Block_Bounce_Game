@@ -16,14 +16,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     public static int REQUEST_CODE_PLAY= 1000;
-
+    BrickBreakerView homeGameView;
     Button btnPlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        homeGameView = findViewById(R.id.game_view);
+        homeGameView.isInteractive = false;
         btnPlay = findViewById(R.id.btnPlay);
         btnPlay.setOnClickListener(new View.OnClickListener() {
             @Override
