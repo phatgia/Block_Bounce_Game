@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,20 +13,25 @@ import android.view.View;
 public class BrickBreakerView extends View {
     private Paint paintBg, paintPaddle, paintBall, paintBrick;
 
+    private GameListener gameListener;
+    private int score = 0;
     private final int ROWS = 6;
     private final int COLS = 7;
-
+    private Ball ball;
     boolean isInteractive = true;
 
     public boolean[][] bricks = new boolean[ROWS][COLS];
 
-    // 5 Mã màu chuẩn xác từ bản thiết kế
+    public void setGameListener(GameListener listener) {
+        this.gameListener = listener;
+    }
+
     private final String[] BRICK_COLORS = {
-            "#F17D6E", // Đỏ san hô
-            "#F4CF57", // Vàng
-            "#58D68D", // Xanh ngọc
-            "#6C9EEB", // Xanh lam
-            "#A569BD"  // Tím
+            "#F17D6E",
+            "#F4CF57",
+            "#58D68D",
+            "#6C9EEB",
+            "#A569BD"
     };
 
     private float brickWidth, brickHeight;
@@ -34,8 +41,83 @@ public class BrickBreakerView extends View {
     public float paddleX, paddleY;
     public float paddleWidth = 180f, paddleHeight = 24f;
 
-    public float ballX, ballY;
-    public float ballRadius = 14f;
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private boolean isRunning = false;
+
+    private Runnable updateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!isRunning) {
+                return;
+            }
+            if (ball != null) {
+                ball.move();
+                checkCollision();
+            }
+            invalidate();
+            handler.postDelayed(this, 16);
+        }
+    };
+
+    public void checkCollision() {
+        if (ball == null) {
+            return;
+        }
+
+        if (ball.x - ball.radius < 0 || ball.x + ball.radius >= getWidth()) {
+            ball.speedX *= -1;
+        }
+
+        if (ball.y - ball.radius < 0) {
+            ball.speedY *= -1;
+        }
+
+        if (ball.y + ball.radius >= paddleY && ball.y - ball.radius <= paddleY + paddleHeight) {
+            if (ball.x >= paddleX && ball.x <= paddleX + paddleWidth) {
+                ball.speedY = -Math.abs(ball.speedY);
+            }
+        }
+
+        if (ball.y - ball.radius > getHeight()) {
+            stopGame();
+            if (gameListener != null) {
+                gameListener.onGameOver();
+            }
+            return;
+        }
+
+        float currentY = padding + 40f;
+        boolean hasRemainingBricks = false;
+
+        for (int r = 0; r < ROWS; r++) {
+            float currentX = padding;
+            for (int c = 0; c < COLS; c++) {
+                if (bricks[r][c]) {
+                    hasRemainingBricks = true;
+                    if (ball.x + ball.radius >= currentX && ball.x - ball.radius <= currentX + brickWidth
+                            && ball.y + ball.radius >= currentY && ball.y - ball.radius <= currentY + brickHeight) {
+                        bricks[r][c] = false;
+                        ball.speedY *= -1;
+
+                        score += 10;
+                        if (gameListener != null) {
+                            gameListener.onScoreUpdated(score);
+                        }
+                        return;
+                    }
+                }
+                currentX += brickWidth + gap;
+            }
+            currentY += brickHeight + gap;
+        }
+
+        if (!hasRemainingBricks) {
+            stopGame();
+            if (gameListener != null) {
+                gameListener.onGameVictory();
+            }
+        }
+    }
 
     public BrickBreakerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -58,7 +140,6 @@ public class BrickBreakerView extends View {
         paintBrick = new Paint(Paint.ANTI_ALIAS_FLAG);
         paintBrick.setStyle(Paint.Style.FILL);
 
-
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLS; c++) {
                 bricks[r][c] = true;
@@ -78,9 +159,7 @@ public class BrickBreakerView extends View {
         paddleX = w / 2f - paddleWidth / 2f;
         paddleY = h - padding - 100f;
 
-        // Đặt bóng nằm ngay trên thanh trượt
-        ballX = w / 2f;
-        ballY = paddleY - ballRadius - 40f;
+        ball = new Ball(w / 2f, paddleY - 14f - 40f, 14f);
     }
 
     @Override
@@ -114,12 +193,14 @@ public class BrickBreakerView extends View {
                 12f, 12f, paintPaddle
         );
 
-        canvas.drawCircle(ballX, ballY, ballRadius, paintBall);
+        if (ball != null) {
+            canvas.drawCircle(ball.x, ball.y, ball.radius, paintBall);
+        }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(!isInteractive){
+        if (!isInteractive) {
             return false;
         }
         float touchX = event.getX();
@@ -144,5 +225,35 @@ public class BrickBreakerView extends View {
         return super.onTouchEvent(event);
     }
 
+    public void startGame() {
+        if (!isRunning) {
+            isRunning = true;
+            handler.post(updateRunnable);
+        }
+    }
 
+    public void stopGame() {
+        isRunning = false;
+        handler.removeCallbacks(updateRunnable);
+    }
+
+    public void resetGame() {
+        stopGame();
+        score = 0;
+        for (int r = 0; r < ROWS; r++) {
+            for (int c = 0; c < COLS; c++) {
+                bricks[r][c] = true;
+            }
+        }
+        if (getWidth() > 0 && getHeight() > 0) {
+            paddleX = getWidth() / 2f - paddleWidth / 2f;
+            paddleY = getHeight() - padding - 100f;
+            if (ball != null) {
+                ball.x = getWidth() / 2f;
+                ball.y = paddleY - ball.radius - 40f;
+                ball.resetRandomDirection();
+            }
+        }
+        invalidate();
+    }
 }
