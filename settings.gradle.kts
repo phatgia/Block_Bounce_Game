@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Sand_Clock_Application"
+rootProject.name = "Block_Bounce_Game"
 include(":app")
