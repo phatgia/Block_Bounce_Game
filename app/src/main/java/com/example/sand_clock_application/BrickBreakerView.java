@@ -34,6 +34,8 @@ public class BrickBreakerView extends View {
             "#A569BD"
     };
 
+    private int[] parsedBrickColors;
+
     private float brickWidth, brickHeight;
     private float padding = 36f;
     private float gap = 16f;
@@ -140,6 +142,11 @@ public class BrickBreakerView extends View {
         paintBrick = new Paint(Paint.ANTI_ALIAS_FLAG);
         paintBrick.setStyle(Paint.Style.FILL);
 
+        parsedBrickColors = new int[BRICK_COLORS.length];
+        for (int i = 0; i < BRICK_COLORS.length; i++) {
+            parsedBrickColors[i] = Color.parseColor(BRICK_COLORS[i]);
+        }
+
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLS; c++) {
                 bricks[r][c] = true;
@@ -173,8 +180,8 @@ public class BrickBreakerView extends View {
             float currentX = padding;
             for (int c = 0; c < COLS; c++) {
                 if (bricks[r][c]) {
-                    int colorIndex = (r + c) % BRICK_COLORS.length;
-                    paintBrick.setColor(Color.parseColor(BRICK_COLORS[colorIndex]));
+                    int colorIndex = (r + c) % parsedBrickColors.length;
+                    paintBrick.setColor(parsedBrickColors[colorIndex]);
 
                     canvas.drawRoundRect(
                             currentX, currentY,
@@ -228,6 +235,7 @@ public class BrickBreakerView extends View {
     public void startGame() {
         if (!isRunning) {
             isRunning = true;
+            handler.removeCallbacks(updateRunnable);
             handler.post(updateRunnable);
         }
     }
