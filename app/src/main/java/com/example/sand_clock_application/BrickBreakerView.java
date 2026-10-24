@@ -4,9 +4,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.AttributeSet;
+import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -43,12 +42,11 @@ public class BrickBreakerView extends View {
     public float paddleX, paddleY;
     public float paddleWidth = 180f, paddleHeight = 24f;
 
-    private Handler handler = new Handler(Looper.getMainLooper());
     private boolean isRunning = false;
 
-    private Runnable updateRunnable = new Runnable() {
+    private Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
         @Override
-        public void run() {
+        public void doFrame(long frameTimeNanos) {
             if (!isRunning) {
                 return;
             }
@@ -57,7 +55,7 @@ public class BrickBreakerView extends View {
                 checkCollision();
             }
             invalidate();
-            handler.postDelayed(this, 16);
+            Choreographer.getInstance().postFrameCallback(this);
         }
     };
 
@@ -66,16 +64,22 @@ public class BrickBreakerView extends View {
             return;
         }
 
-        if (ball.x - ball.radius < 0 || ball.x + ball.radius >= getWidth()) {
-            ball.speedX *= -1;
+        if (ball.x - ball.radius < 0) {
+            ball.x = ball.radius;
+            ball.speedX = Math.abs(ball.speedX);
+        } else if (ball.x + ball.radius >= getWidth()) {
+            ball.x = getWidth() - ball.radius;
+            ball.speedX = -Math.abs(ball.speedX);
         }
 
         if (ball.y - ball.radius < 0) {
-            ball.speedY *= -1;
+            ball.y = ball.radius;
+            ball.speedY = Math.abs(ball.speedY);
         }
 
         if (ball.y + ball.radius >= paddleY && ball.y - ball.radius <= paddleY + paddleHeight) {
             if (ball.x >= paddleX && ball.x <= paddleX + paddleWidth) {
+                ball.y = paddleY - ball.radius;
                 ball.speedY = -Math.abs(ball.speedY);
             }
         }
@@ -235,14 +239,14 @@ public class BrickBreakerView extends View {
     public void startGame() {
         if (!isRunning) {
             isRunning = true;
-            handler.removeCallbacks(updateRunnable);
-            handler.post(updateRunnable);
+            Choreographer.getInstance().removeFrameCallback(frameCallback);
+            Choreographer.getInstance().postFrameCallback(frameCallback);
         }
     }
 
     public void stopGame() {
         isRunning = false;
-        handler.removeCallbacks(updateRunnable);
+        Choreographer.getInstance().removeFrameCallback(frameCallback);
     }
 
     public void resetGame() {
