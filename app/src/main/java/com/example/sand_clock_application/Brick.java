@@ -19,8 +19,12 @@ public class Brick {
             return false;
         }
 
-        if (ball.x + ball.radius >= x && ball.x - ball.radius <= x + width
-                && ball.y + ball.radius >= y && ball.y - ball.radius <= y + height) {
+        float nearestX = Math.max(x, Math.min(ball.x, x + width));
+        float nearestY = Math.max(y, Math.min(ball.y, y + height));
+        float dx = ball.x - nearestX;
+        float dy = ball.y - nearestY;
+
+        if (dx * dx + dy * dy <= ball.radius * ball.radius) {
             isVisible = false;
             return true;
         }
